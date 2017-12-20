@@ -1,1 +1,8 @@
+# Data is not part of version control
 data/
+
+# LaTeX
+*.aux
+*.log
+*.synctex.gz
+*.pdf
