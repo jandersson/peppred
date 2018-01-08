@@ -54,3 +54,32 @@ def annotate_regions(datum):
         'sequence': sequence,
         'annotations': str(annotation),
     }
+
+def transform_data(data):
+    """Perform preprocessing steps"""
+    
+    transformed_data = []
+    for key in data:
+        for subkey in data[key]:
+            # Remove annotations
+            data[key][subkey] = [annotate_regions(raw_datum.seq)['sequence'] for raw_datum in data[key][subkey]]
+            # Flatten data into a list of dictionaries with features as the key
+            for item in data[key][subkey]:
+                data_item = {
+                    'sequence': item,
+                    'class': None,
+                    'tm': None,
+                }
+                data_item['class'] = 0 if key == 'negative_examples' else 1
+                data_item['tm'] = False if subkey == 'non_tm' else True
+                transformed_data.append(data_item)
+    # Quick sanity check, check if lengths of the data and transformed data are the same
+    assert len([item for item in transformed_data if item['class'] == 1]) \
+                == len(data['positive_examples']['tm'] + data['positive_examples']['non_tm'])
+    assert len([item for item in transformed_data if item['class'] == 0]) \
+                == len(data['negative_examples']['tm'] + data['negative_examples']['non_tm'])
+    assert len([item for item in transformed_data if item['tm']]) \
+                == len(data['positive_examples']['tm'] + data['negative_examples']['tm'])
+    assert len([item for item in transformed_data if not item['tm']]) \
+                == len(data['positive_examples']['non_tm'] + data['negative_examples']['non_tm'])
+    return transformed_data
