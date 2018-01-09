@@ -1,6 +1,3 @@
-# Data is not part of version control
-data/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
