@@ -1,10 +1,16 @@
 import glob
 import os
 from Bio import SeqIO
-import os
+from Bio.Alphabet.IUPAC import extended_protein
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+
 
 def get_data():
-    """Return a dictionary of all training data, keyed by positive and negative examples, subkeyed by tm/non tm"""
+    """
+    Return a dictionary of all training data, keyed by positive and negative examples,
+    subkeyed by tm/non tm
+    """
     files = {
         'positive_examples': {
             'tm': [],
@@ -30,7 +36,7 @@ def get_data():
         for subkey in files[key]:
             file_path = os.path.join(data_dir, key, subkey, '*.faa')
             files[key][subkey] = glob.glob(file_path, recursive=True)
-            for item in [SeqIO.parse(data_file, format='fasta') for data_file in files[key][subkey]]:
+            for item in [SeqIO.parse(data_file, format='fasta', alphabet=extended_protein) for data_file in files[key][subkey]]:
                 for subitem in item:
                     data[key][subkey].append(subitem)
     return data
@@ -57,7 +63,7 @@ def annotate_regions(datum):
 
 def transform_data(data):
     """Perform preprocessing steps"""
-    
+
     transformed_data = []
     for key in data:
         for subkey in data[key]:
@@ -83,3 +89,32 @@ def transform_data(data):
     assert len([item for item in transformed_data if not item['tm']]) \
                 == len(data['positive_examples']['non_tm'] + data['negative_examples']['non_tm'])
     return transformed_data
+
+def split_and_vectorize(transformed_data, n_gram_range=(2, 2)):
+    """Vectorize and split data"""
+    examples = [str(seq['sequence']) for seq in transformed_data]
+    labels = [item['class'] for item in transformed_data]
+    x_train, x_test, y_train, y_test = train_test_split(examples, labels,
+                                                        test_size=0.1, random_state=99)
+    vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=n_gram_range)
+    x_train = vectorizer.fit_transform(x_train)
+    x_test = vectorizer.transform(x_test)
+    feature_names = vectorizer.get_feature_names()
+    return {
+        'x_train': x_train,
+        'y_train': y_train,
+        'x_test': x_test,
+        'y_test': y_test,
+        'feature_names': feature_names,
+    }
+
+def get_ml_data():
+    return split_and_vectorize(transform_data(get_data()))
+if __name__ == '__main__':
+    raw_data = get_data()
+    transformed_data = transform_data(raw_data)
+    ml_data = split_and_vectorize(transformed_data)
+    print(ml_data.keys())
+    ml_data = get_ml_data()
+    print(ml_data.keys())
+    
