@@ -133,6 +133,10 @@
 % Leave date blank
 \date{}
 
+% Images
+\usepackage{graphics}
+\graphicspath{ {img/} }
+
 % Header and Footer with logo
 \usepackage{lastpage,fancyhdr,graphicx}
 \usepackage{epstopdf}
@@ -140,13 +144,17 @@
 \pagestyle{fancy}
 \fancyhf{}
 \setlength{\headheight}{27.023pt}
-\lhead{\includegraphics[width=2.0in]{PLOS-submission.eps}}
+%\lhead{\includegraphics[width=2.0in]{PLOS-submission.eps}}
 \rfoot{\thepage/\pageref{LastPage}}
 \renewcommand{\footrule}{\hrule height 2pt \vspace{2mm}}
 \fancyheadoffset[L]{2.25in}
 \fancyfootoffset[L]{2.25in}
-\lfoot{\sf PLOS}
+\lfoot{\sf KTH}
 
+% Custom includes
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+\usepackage{booktabs}
 %% Include all macros below
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -159,7 +167,7 @@
 	% Title must be 250 characters or less.
 	\begin{flushleft}
 		{\Large
-			\textbf\newline{Predicting signal peptides using machine learning} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
+			\textbf\newline{Predicting signal peptides using language modeling} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
 		}
 		\newline
 		% Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
@@ -215,67 +223,114 @@
 	
 	There exist a number of computational methods for predicting these sorting signals using distinctly different approaches. It is useful to locate these signals as it can potentially add insight into protein translocation, how chromosomes are rearranged. Some examples of application domains for signal prediction include drug discovery and gene therapy \cite{thesis}. Numbering among these computational approaches are neural networks(NNs), support vector machines(SVMs), hidden markov models (HMMs), decision trees, and ensemble learning methods. These algorithms are encompassed in field of computer science called machine learning. Machine learning (ML) algorithms learn and make decisions from data \cite{wikipedia}. ML comprises a broad spectrum of approaches; much of the work done on signal prediction is approached as a classification problem. In classification, a probability distribution is drawn over the classes, and we choose the class that has the highest probability \cite{jurafsky}. $$ \hat{c} = \argmax_{c \in C}{ \Pr(c \vert x)} $$
 	
-	A sequence classifier is a model whose job is to assign a label to some part of a sequence \cite{jurafsky}. 
-	
-	The advantage of HMM's is that they can be constructed from only positive examples.
-	
-	
 	\section*{Materials and methods}
-	\subsection*{Etiam eget sapien nibh}
+	\subsection*{Data Preprocessing}
+	The training data comes from the project course page. The training data is FASTA-like with each sequence followed by an annotation line.  The annotation line marks the location of the n-, h-, and c- regions. The annotation line is removed during preprocessing. The training data is a corpus
+	
+	\subsection*{Data Modeling}
+	The training data is represented using a language model called N-grams. N-gram models are a probabilistic language model which predict the next word or symbol from the previous N-1 words or symbols. Since we are using amino acid residues in place of words, this will instead predict the next residue from the previous N-1 residues. 
+
+	N-gram models are trained on a corpus which is a computer readable collection of text or speech\cite{jurafsky}. The training data is a corpus which contains 2654 examples. The sequence lengths in the corpus range from 16 residues to 4563 residues. With most sequences having a length between 16 and 1000 residues in length as seen in figure \ref{fig:sequence-hist}. 
 	
 	% For figure citations, please use "Fig" instead of "Figure".
-	
 	% Place figure captions after the first paragraph in which they are cited.
-	\begin{figure}[!h]
-		\caption{{\bf Bold the figure title.}
-			Figure caption text here, please use this space for the figure panel descriptions instead of using subfigure commands. A: Lorem ipsum dolor sit amet. B: Consectetur adipiscing elit.}
-		\label{fig1}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.5, width=\textwidth]{sequence-hist}
+		\caption{{\bf Training Data Length Histogram}}
+		\label{fig:sequence-hist}
 	\end{figure}
 	
-	% Results and Discussion can be combined.
-	\section*{Results}
+	Once the data is counted, it is vectorized into a vector space model where the sequences are converted into vectors of features representing the amino acids that appear in a sequence. The value of each feature is the term weight and is a function of the terms frequency in the sequence.
 	
+	The collection of sequences characterized as vectors can be viewed as a sparse matrix of weights where $w_{i,j}$ is the weight of the residue N-gram $i$ in sequence $j$. This matrix is called a term-by-document matrix \cite{jurafsky}.  
+	
+	The term weighting is not only a function of the frequency but also its inverse frequency. The inverse document frequency, IDF, term weight assigns higher weights to more discriminative terms. Discriminative terms occur in only a few of the sequences. 
+	$$ idf_i = \log {\frac{N}{n_i}}$$ We combine IDF with term frequency, TF, to obtain tf-idf weighting. $$w_{i,j} = tf_{i,j} \times idf_i$$ TF-IDF prefers words that are frequent in the current sequence but rare overall in the collection \cite{jurafsky}.
+	
+	\subsection*{Training and Test Sets}
+	The probabilities of the N-gram model come from the corpus it is trained on. The parameters of a statistical model are trained on a set of data and then the model is applied to new unseen data to determine performance. The unseen data set is often called a test set. Using this method we can also evaluate model parameters, such as different orders of N in an N-gram model. Ideally, a models training set should be as large as possible without making the test set unrepresentative. In practice this is typically $80\%$ training, $10\%$ development, and $10\%$ test \cite{jurafsky}. This project does not use a development set so the division will be $80\%$ training and $20\%$ test. 
+	
+	\subsection*{Classifiers}
+	\subsubsection*{Naive Bayes}
+	Naive Bayes is often employed as a good baseline method, yielding results that are sufficiently good for practical use \cite{jurafsky}.
+	
+	\subsubsection*{Support Vector Machines}
+	
+	\subsubsection*{Random Forests}
+	Random forests are an ensemble method. A random forest consists of multiple decision trees. 
+	
+	
+	% Results and Discussion can be combined.
+	\section*{Results and Discussion}
+	
+	Improving a model lies in understanding where mistakes are made. In a classifier this is done with a confusion matrix (also called a contingency table). A confusion matrix for a 2-way classification task is a $2 \times 2$ matrix, where cell $x,y$ is the number of times an item with correct classification as $x$ was classified by the model as $y$. 
 	% Place tables after the first paragraph in which they are cited.
+
 	\begin{table}[!ht]
-		\begin{adjustwidth}{-2.25in}{0in} % Comment out/remove adjustwidth environment if table fits in text column.
-			\centering
-			\caption{
-				{\bf Table caption Nulla mi mi, venenatis sed ipsum varius, volutpat euismod diam.}}
-			\begin{tabular}{|l+l|l|l|l|l|l|l|}
-				\hline
-				\multicolumn{4}{|l|}{\bf Heading1} & \multicolumn{4}{|l|}{\bf Heading2}\\ \thickhline
-				$cell1 row1$ & cell2 row 1 & cell3 row 1 & cell4 row 1 & cell5 row 1 & cell6 row 1 & cell7 row 1 & cell8 row 1\\ \hline
-				$cell1 row2$ & cell2 row 2 & cell3 row 2 & cell4 row 2 & cell5 row 2 & cell6 row 2 & cell7 row 2 & cell8 row 2\\ \hline
-				$cell1 row3$ & cell2 row 3 & cell3 row 3 & cell4 row 3 & cell5 row 3 & cell6 row 3 & cell7 row 3 & cell8 row 3\\ \hline
-			\end{tabular}
-			\begin{flushleft} Table notes Phasellus venenatis, tortor nec vestibulum mattis, massa tortor interdum felis, nec pellentesque metus tortor nec nisl. Ut ornare mauris tellus, vel dapibus arcu suscipit sed.
-			\end{flushleft}
-			\label{table1}
-		\end{adjustwidth}
+		\centering
+		\caption{{\bf SVM Confusion Matrix on Test Data}}
+		\label{tab:conf-svm}
+		\begin{tabular}{lcc}
+		\hline
+		& \multicolumn{1}{l}{\textbf{Condition Positive}} & \multicolumn{1}{l}{\textbf{Condition Negative}} \\ \hline
+		\textbf{Predicted Positive} & 242                                             & 24                                              \\
+		\textbf{Predicted Negative} & 33                                              & 232                                             \\ \hline
+		\end{tabular}
+	\end{table}
+
+	\begin{table}[!ht]
+		\centering
+		\caption{{\bf Naive Bayes Confusion Matrix on Test Data}}
+		\label{tab:conf-nb}
+		\begin{tabular}{@{}lcc@{}}
+			\toprule
+			& \multicolumn{1}{l}{\textbf{Condition Positive}} & \multicolumn{1}{l}{\textbf{Condition Negative}} \\ \midrule
+			\textbf{Predicted Positive} & 214                                             & 52                                              \\
+			\textbf{Predicted Negative} & 17                                              & 248                                             \\ \bottomrule
+		\end{tabular}
+	\end{table}
+			
+	\begin{table}[!ht]
+		\centering
+		\caption{{\bf Random Forest Confusion Matrix on Test Data}}
+		\label{tab:conf-forest}
+		\begin{tabular}{lcc}
+			\hline
+			& \multicolumn{1}{l}{\textbf{Condition Positive}} & \multicolumn{1}{l}{\textbf{Condition Negative}} \\ \hline
+			\textbf{Predicted Positive} & 214                                             & 52                                              \\
+			\textbf{Predicted Negative} & 38                                              & 227                                             \\ \hline
+		\end{tabular}
 	\end{table}
 	
+	\subsection*{Classifying Proteomes}
+	The classifiers were ran on two complete Proteomes downloaded from BioMarts Ensembl service. The two proteomes are Choloepus hoffmanni (Sloth) and Gallus gallus (Chicken). A summary of the classifiers signal peptide detection rate is shown in table \ref{tab:sloth} for Choloepus hoffmanni and table \ref{tab:chicken} for Gallus gallus. The total number of protein sequences for each species can be seen in table \ref{tab:prot-count}.
 	
-	%PLOS does not support heading levels beyond the 3rd (no 4th level headings).
-	\subsection*{nunc blandit a tortor}
-	\subsubsection*{3rd level heading} 
+	\begin{table}[!ht]
+		\centering
+		\caption{{\bf Choloepus hoffmanni positive prediction frequency and percentage of total proteome containing signal peptides}}
+		\label{tab:sloth}
+		\begin{tabular}{@{}lcc@{}}
+			\toprule
+			& \multicolumn{1}{l}{Positive Predictions} & \multicolumn{1}{l}{Percentage} \\ \midrule
+			\textbf{Naive Bayes}   & 3493                                     & 28.1\%                         \\
+			\textbf{SVM}           & 2080                                     & 16.7\%                         \\
+			\textbf{Random Forest} & 2603                                     & 20.8\%                        
+		\end{tabular}
+	\end{table}
 	
-	\begin{enumerate}
-		\item{react}
-		\item{diffuse free particles}
-		\item{increment time by dt and go to 1}
-	\end{enumerate}
-	
-	
-	\subsection*{Sed ac quam id nisi malesuada congue}
-
-	
-	\begin{itemize}
-		\item First bulleted item.
-		\item Second bulleted item.
-		\item Third bulleted item.
-	\end{itemize}
-	
-	\section*{Discussion}
+	\begin{table}[!ht]
+		\centering
+		\caption{{\bf Gallus gallus positive prediction frequency and percentage of total proteome containing signal peptides}}
+		\label{tab:chicken}
+		\begin{tabular}{@{}lcc@{}}
+			\toprule
+			& \multicolumn{1}{l}{Positive Predictions} & \multicolumn{1}{l}{Percentage} \\ \midrule
+			\textbf{Naive Bayes}   & 10250                                    & 33.9\%                         \\
+			\textbf{SVM}           & 5982                                     & 19.8\%                         \\
+			\textbf{Random Forest} & 8018                                     & 26.5\%                        
+		\end{tabular}
+	\end{table}
 	
 	\section*{Conclusion}
 	
