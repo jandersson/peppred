@@ -253,14 +253,74 @@
 	
 	\subsection*{Classifiers}
 	\subsubsection*{Naive Bayes}
-	Naive Bayes is often employed as a good baseline method, yielding results that are sufficiently good for practical use \cite{jurafsky}.
+	In general, a classifier can be said to be a function that finds the class $C_k$ that is most probable given the observed data:
+	
+	\begin{equation}
+	p(C_k|x_1, \dots ,x_n)
+	\end{equation}
+	
+	\noindent Using Bayes Theorem, we get
+	
+	\begin{equation}
+	p(C_k|x_1,\dots,x_n) \propto p(C_k) p(x_1,\dots,x_n|C_k)
+	\end{equation}
+	
+	\noindent which can be expanded to the following using the chain rule of conditional probabilities: 
+	
+	\begin{equation}
+	\label{eq:chain}
+	p(x_1,\dots,x_n|C_k) = p(x_1|x_2\dots,x_n,C_k) \dots p(x_n|C_k)
+	\end{equation}
+	
+	\noindent The conditional probabilities in equation \ref{eq:chain} can be hard to compute. Naive Bayes makes the assumption that the data are independent of each other given the class. We thus get
+	
+	\begin{equation}
+	p(x_i|x_{i+1}\dots,x_n,C_k) = p(x_i|C_k)
+	\end{equation}
+	
+	\noindent Equation \ref{eq:chain} then simplifies to
+	
+	\begin{equation}
+	\begin{gathered}
+	p(x_1,\dots,x_n|C_k) = p(x_1|C_k) \dots p(x_n|C_k) \\
+	\Rightarrow \\
+	p(C_k|x_1,\dots,x_n) \propto p(C_k) p(x_1|C_k) \dots p(x_n|C_k)
+	\end{gathered}
+	\end{equation}
+	
+	\noindent Compressing this, the Naive Bayes classifier finds the most likely class $\hat{y}$,
+	
+	\begin{equation}
+	\hat{y} = \argmax_{k} \, p(C_k) \prod_{i=1}^{n} p(x_i|C_k)    
+	\end{equation}
+	
+	\noindent $p(C_k)$ can be estimated by counting the frequencies of the classes in the training set. Similarly, the conditional probabilities $p(x_i|C_k)$ are the frequencies of each residue n-gram in the different classes. To avoid a product of zero if a residue n-gram has never appeared in a class, one can do \textit{smoothing}, which slightly changes all probabilities to avoid zeros. 
+	
+	Naive Bayes is often employed as a good baseline method, yielding results that are sufficiently good for practical use \cite{jurafsky}. As a baseline, this classifier is expected to perform the worst, but with at least 70 percent accuracy.
 	
 	\subsubsection*{Support Vector Machines}
 	
+	Support Vector Machines are a case of a maximal margin classifier that can draw non-linear decision boundaries. Support vector machines are intended for a binary classification setting, such as the problem posed in this project. SVMs make use of a kernel to transform the input space into a higher dimensional space for the purpose of finding the separating hyperplane with maximum margins. There are a number of different non-linear kernels to use, a popular choice is the radial kernel \cite{yellowbook} which takes the form of 
+	\begin{equation}
+	\label{rbf}
+	K(x_i, x_{i^\prime}) = \exp({-\gamma \sum_{j=1}^{p}({x_{ij}-x_{x^\prime j}})^2})
+	\end{equation}
+	
+	When given an observation that has a large euclidean distance from a training observation then the sum $\sum_{j=1}^{p}({x_{ij}-x_{x^\prime j}})^2$ will be large, but the equation \ref{rbf} will be small. This means that it will not affect the classification of points closer to the training data. Support vector machines are considered one of the best 'out of the box' classifiers \cite{yellowbook}. In this experiment we make use of the radial or RBF kernel. It is hypothesized that this will be the strongest classifier of the 3 chosen. 
+	
 	\subsubsection*{Random Forests}
-	Random forests are an ensemble method. A random forest consists of multiple decision trees. 
+	Random Forests are a collection of decision tree's. Decision tree's suffer from high variance, because when the training data is split randomly and fit to a decision tree, the results could be different based on the split \cite{yellowbook}. However with random forests, each time a split is considered, a random sample of $m$ predictors is chosen instead of the full set of predictors $p$. A rule of thumb is that the sample $m \approx \sqrt{p}$ \cite{yellowbook}. Sampling only a subset of the total predictors mitigates the effect of very strong predictors. In a standard tree these strong predictors would be candidates for the top split because they maximize the information gain. 
 	
+	\subsection*{Stafford Noble's Guidelines}
+	The guidelines given in 'A Quick Guide to Organizing Computational Biology Projects' \cite{noble} were adhered to for the most part with some small deviations. The deviations were largely due to time constraints. The spirit of the document was followed.
 	
+	The project directory structure was adhered to as per Stafford Noble. Source code is in a 'src' folder, the doc folder contains the report, data contains the training and proteome data. The bin folder was excluded in favor of a python driver script using argparse. This could have been easily changed into a 'binary' by adding the file to the workstations PATH and removing the extension, but it was deemed unnecessary for the sake of time. 
+	
+	A lab notebook was kept in the form of a markdown file. The markdown file is the summary of hand written notes and ipython notebooks as well as general brainstorming. 
+	
+	Documenting the source code was done with docstrings. This deviated as the project deadline drew near and errors were encountered. Some functions went through several revisions and updating the docstrings in the intermediate state would have been a waste of time. Code was prototyped in an ipython notebook (included in the project source files under the notebooks directory) and then transferred to a python module. The scripts written could be classifed as 'project specific' in the 4 categories defined in Stafford Noble. 
+	
+	The use of version control was followed nearly to the letter. A .gitignore file was used to ignore generated files such as the temporary files generated by python and LaTeX editors. Data was checked in to version control as a time saving measure. This made it easy to pull and push changes when working on different workstations. Normally a function would be used to pull the data from AWS or some other repository purposed for storing data. For the sake of time, data was checked in. 
 	% Results and Discussion can be combined.
 	\section*{Results and Discussion}
 	
@@ -291,7 +351,7 @@
 		\end{tabular}
 	\end{table}
 
-\begin{table}[]
+\begin{table}[!ht]
 	\centering
 	\caption{{\bf Confusion matrix for transmembrane and non-transmembrane data }}
 	\label{tab:conf-all}
@@ -375,10 +435,21 @@
 		\newblock {{S}peech and language processing: An introduction to natural language processing, computational linguistics, and speech recognition.}
 		\newblock {London: Pearson Education; 2009}
 		
+		\bibitem{noble}
+		Noble WS (2009) 
+		\newblock {{A} Quick Guide to Organizing Computational Biology Projects.} 
+		\newblock {PLoS Comput Biol 5(7). 2009: e1000424. https://doi.org/10.1371/journal.pcbi.1000424}
+		
 		\bibitem{ensembl}
 		Zerbino D, Achuthan P, Akanni W, Amode M, Barrell D, Bhai J et al. 
-		\newblock Ensembl 2018. 
-		\newblock Nucleic Acids Research. 2017;46(D1):D754-D761. 
+		\newblock {Ensembl 2018. }
+		\newblock {Nucleic Acids Research. 2017;46(D1):D754-D761.} 
+		
+		\bibitem{yellowbook}
+		James G et al.
+		\newblock{{A}n introduction to statistical learning: with applications in R.}
+		\newblock {Springer Texts in Statistics. 2013. DOI 10.1007/978-1-4614-7138-7 9}
+		
 		
 	\end{thebibliography}
 	
