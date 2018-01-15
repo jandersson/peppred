@@ -9,6 +9,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 
 def benchmark_classifiers(classifiers, x_train, y_train, x_test, y_test):
+    """Fit a classifier and return the score on the test set (not used at the moment)"""
     scores = {}
     for clf, name in classifiers:
         clf.fit(x_train, y_train)
@@ -19,7 +20,7 @@ def benchmark_classifiers(classifiers, x_train, y_train, x_test, y_test):
 
 def tune_classifier(clf, params, data):
     """Tunes a classifier by performing grid search over the paramaters"""
-    clf = GridSearchCV(clf, params)
+    clf = GridSearchCV(clf, params, refit=True)
     clf.fit(data['x_train'], data['y_train'])
     return clf
 
@@ -39,8 +40,8 @@ def get_tuned_params(classifier_name):
     tuned_params = {
         'knn': [{'n_neighbors': list(range(1, 21))}],
         'perceptron': [{'n_iter': [100]}],
-        'random_forest': [{}],
-        'svm': [{'C': [0.01, 0.1, 0.5, 1], 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}],
+        'random_forest': [{'n_estimators': [5, 10, 20, 25, 100]}],
+        'svm': [{'C': [0.01, 0.1, 0.5, 1, 10, 100, 1000], 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}],
         'nb': [{}],
         }
     return tuned_params.get(classifier_name)

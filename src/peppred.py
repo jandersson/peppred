@@ -35,6 +35,7 @@ if __name__ == '__main__':
                 print("accuracy: %0.3f" % score)
                 print("confusion matrix:")
                 print(metrics.confusion_matrix(data['y_test'], pred))
+                print(f"params: {clf.best_params_}")
             # print("classification report:")
             # print(metrics.classification_report(data['y_test'], pred, data['feature_names']))
     elif args.file:
@@ -46,5 +47,8 @@ if __name__ == '__main__':
         pred = clf['clf'].predict(file_data)
         hits = sum(pred)
         print(f"Found {hits} signal peptides in {len(pred)} sequences ({hits/len(pred):.1%})")
+    else:
+        parser.error("Please select a file to analyze or use 'benchmark' as a classifier")
+
     
 

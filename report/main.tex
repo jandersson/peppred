@@ -206,7 +206,7 @@
 	\end{flushleft}
 	% Please keep the abstract below 300 words
 	\section*{Abstract}
-	We test three different classifiers against a test set of data to shed light on what techniques makes a good classifier. The classifiers are then used on two proteomes to infer signal peptide sequences. The classification pipeline combines N-gram language modeling with a vector space model using TF-IDF term weighting to provide data abstraction along with knowledge of the signal peptide structure to boost prediction accuracy on the test set of data. 
+	We test three different classifiers against a test set of data to shed light which classifier is best suited for signal peptide prediction. The classifiers are then used on two proteomes to infer signal peptide sequences. The classification pipeline combines N-gram language modeling with a vector space model using TF-IDF term weighting. Increased accuracy is obtained when the model is trained on the general location of the signal peptide chain. 
 	
 	
 	% Please keep the Author Summary between 150 and 200 words
@@ -219,11 +219,19 @@
 	
 	% Use "Eq" instead of "Equation" for equation citations.
 	\section*{Introduction}
-	The localization of proteins is mostly determined by a biological trafficking system. When proteins are synthesized on cytoplasmic ribosomes and have several possible destinations such as the nuclear, mitochondria, or peroxisomes. Signal peptides direct proteins to their proper destination after synthesis, keeping them from arriving at the wrong cellular location. Signal peptides, short chains of amino acids, act as postal codes for their destination. These sorting signals, a N-terminal signal peptide, are removed or cleaved off. If the protein does not have this signal peptide then it remains in the cytoplasm. The structure of the signal peptide consists of a positively charged N-region (1-5 residues long), a hydrophobic h-region (7-15 residues long), and finally a polar C-region (3-7 residues long). The cleavage point is in the C-region, but the location varies between proteins \cite{thesis}. 
+	The localization of proteins is mostly determined by a biological trafficking system. Proteins are synthesized on cytoplasmic ribosomes and have several possible destinations such as the nucleus, mitochondria, or peroxisomes. Signal peptides direct proteins to their proper destination after synthesis, keeping them from arriving at the wrong cellular location. Signal peptides, short chains of amino acids, act as postal codes for their destination. These sorting signals, a N-terminal signal peptide, are then removed or cleaved off. If the protein does not have this signal peptide then it remains in the cytoplasm. The structure of the signal peptide consists of a positively charged N-region (1-5 residues long), a hydrophobic h-region (7-15 residues long), and finally a polar C-region (3-7 residues long). The cleavage point is in the C-region, but the location varies between proteins \cite{thesis}. 
 	
-	There exist a number of computational methods for predicting these sorting signals using distinctly different approaches. It is useful to locate these signals as it can potentially add insight into protein translocation, how chromosomes are rearranged. Some examples of application domains for signal prediction include drug discovery and gene therapy \cite{thesis}. Numbering among these computational approaches are neural networks(NNs), support vector machines(SVMs), hidden markov models (HMMs), decision trees, and ensemble learning methods. These algorithms are encompassed in field of computer science called machine learning. Machine learning (ML) algorithms learn and make decisions from data \cite{wikipedia}. ML comprises a broad spectrum of approaches; much of the work done on signal prediction is approached as a classification problem. In classification, a probability distribution is drawn over the classes, and we choose the class that has the highest probability \cite{jurafsky}. $$ \hat{c} = \argmax_{c \in C}{ \Pr(c \vert x)} $$
+	There exist a number of computational methods for predicting these sorting signals using distinctly different approaches. It is useful to locate these signals as it can potentially add insight into protein translocation, how chromosomes are rearranged. Some examples of application domains for signal prediction include drug discovery and gene therapy \cite{thesis}. Numbering among these computational approaches are neural networks(NNs), support vector machines(SVMs), hidden markov models (HMMs), decision trees, and ensemble learning methods. These algorithms are encompassed in field of computer science called machine learning. Machine learning (ML) algorithms learn and make decisions from data and comprises a broad spectrum of approaches; much of the work done on signal prediction is approached as a classification problem. In classification, a probability distribution is drawn over the classes, and we choose the class that has the highest probability \cite{jurafsky}. $$ \hat{c} = \argmax_{c \in C}{ \Pr(c \vert x)} $$
 	
 	\section*{Materials and methods}
+	\subsection*{Materials}
+	The software used in this project includes:
+	\begin{itemize}
+		\item{Python 3.6}
+		\item{Biopython: Parsing the data}
+		\item{Sci-kit learn: Classifier, vectorization, feature selection, and parameter grid search libraries}
+		\item{Jupyter Notebook: Prototyping}
+	\end{itemize}
 	\subsection*{Data Preprocessing}
 	The training data is FASTA-like with each sequence followed by an annotation line.  The annotation line marks the location of the n-, h-, and c- regions. The annotation line is removed during preprocessing. The training data is a corpus
 	
@@ -306,7 +314,7 @@
 	K(x_i, x_{i^\prime}) = \exp({-\gamma \sum_{j=1}^{p}({x_{ij}-x_{x^\prime j}})^2})
 	\end{equation}
 	
-	When given an observation that has a large euclidean distance from a training observation then the sum $\sum_{j=1}^{p}({x_{ij}-x_{x^\prime j}})^2$ will be large, but the equation \ref{rbf} will be small. This means that it will not affect the classification of points closer to the training data. Support vector machines are considered one of the best 'out of the box' classifiers \cite{yellowbook}. In this experiment we make use of the radial or RBF kernel. It is hypothesized that this will be the strongest classifier of the 3 chosen. 
+	When given an observation that has a large euclidean distance from a training observation then the sum $\sum_{j=1}^{p}({x_{ij}-x_{x^\prime j}})^2$ will be large, but the equation \ref{rbf} will be small. This means that it will not affect the classification of points closer to the training data. Support vector machines are considered one of the best 'out of the box' classifiers \cite{yellowbook}. In this experiment will do a grid search to find the kernel which performs the best on the held out data set. It is hypothesized that this will be the strongest classifier of the 3 chosen. 
 	
 	\subsubsection*{Random Forests}
 	Random Forests are a collection of decision tree's. Decision tree's suffer from high variance, because when the training data is split randomly and fit to a decision tree, the results could be different based on the split \cite{yellowbook}. However with random forests, each time a split is considered, a random sample of $m$ predictors is chosen instead of the full set of predictors $p$. A rule of thumb is that the sample $m \approx \sqrt{p}$ \cite{yellowbook}. Sampling only a subset of the total predictors mitigates the effect of very strong predictors. In a standard tree these strong predictors would be candidates for the top split because they maximize the information gain. Random forests decorrelate the tree's by only considering a subset of the predictors. If $m=p$ then this is known as bagging.
@@ -327,17 +335,18 @@
 	Improving a model lies in understanding where mistakes are made. In a classifier this is done with a confusion matrix (also called a contingency table). A confusion matrix for a 2-way classification task is a $2 \times 2$ matrix, where cell $x,y$ is the number of times an item with correct classification as $x$ was classified by the model as $y$. 
 	% Place tables after the first paragraph in which they are cited.
 
-	Looking at the confusion matrix for models trained and tested on transmembrane data in Table \ref{tab:conf-tm} we can see that there are not many examples to work with. The high error rate demonstrates the need for collecting more examples or features surrounding transmembrane signal peptides.
+	Looking at the confusion matrix for models trained and tested on transmembrane data in Table \ref{tab:conf-tm} we can see that there are not many examples to work with. The high error rate demonstrates the need for collecting more examples or features surrounding transmembrane signal peptides. The results found in the tables are produced with trigrams and a residue length of 35. The SVM is using a linear kernel with a C value of 10. The random forest is using 20 estimators.
 	\begin{table}[!ht]
 		\centering
 		\caption{{\bf Confusion matrix for transmembrane data}}
 		\label{tab:conf-tm}
-		\begin{tabular}{lccllcc}
-			\multicolumn{3}{l}{Naive Bayes}                                                & \multicolumn{2}{c}{SVM}                                          & \multicolumn{2}{l}{Random Forest} \\ \hline
-			& \multicolumn{1}{l}{\textbf{P}} & \multicolumn{1}{l|}{\textbf{N}} & \multicolumn{1}{c}{\textbf{P}} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
-			\textbf{PP} & 47                             & \multicolumn{1}{c|}{0}          & 47                             & \multicolumn{1}{l|}{0}          & 47              & 0               \\
-			\textbf{PN} & 12                             & \multicolumn{1}{c|}{0}          & 8                              & \multicolumn{1}{l|}{4}          & 12              & 0               \\ \hline
-		\end{tabular}
+	\begin{tabular}{lccclcc}
+		\multicolumn{3}{l}{Naive Bayes}                                                      & \multicolumn{2}{c}{SVM}                                  & \multicolumn{2}{l}{Random Forest} \\ \hline
+		& \multicolumn{1}{l}{\textbf{P}} & \multicolumn{1}{l|}{\textbf{N}} & \textbf{P}             & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
+		\textbf{PP}       & 47                             & \multicolumn{1}{c|}{0}          & \multicolumn{1}{l}{47} & \multicolumn{1}{l|}{0}          & 47              & 0               \\
+		\textbf{PN}       & 12                             & \multicolumn{1}{c|}{0}          & \multicolumn{1}{l}{8}  & \multicolumn{1}{l|}{4}          & 11              & 1               \\ \hline
+		\textbf{Accuracy} & \multicolumn{2}{c}{79.7\%}                                       & \multicolumn{2}{c}{86.4\%}                               & \multicolumn{2}{c}{81.4\%}       
+	\end{tabular}
 	\end{table}
 
 	In the confusion matrix for non-transmembrane data found in Table \ref{tab:conf-non-tm} we have more examples to work with. The classifier performs better when examining only non-transmembrane peptides compared to transmembrane only and the whole training set. The SVM classifier does particularly well in this setting. 
@@ -347,27 +356,29 @@
 		\caption{{\bf Confusion matrix for non-transmembrane data}}
 		\label{tab:conf-non-tm}
 		\begin{tabular}{ccccccc}
-			\multicolumn{3}{c}{Naive Bayes}                            & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
+			\multicolumn{3}{c}{Naive Bayes}                                             & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
 			& \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
-			\textbf{PP} & 187        & \multicolumn{1}{c|}{31}         & 204        & \multicolumn{1}{c|}{14}         & 186             & 32              \\
-			\textbf{PN} & 12         & \multicolumn{1}{c|}{243}        & 23         & \multicolumn{1}{c|}{232}        & 42              & 213             \\ \hline
+			\textbf{PP}                  & 187        & \multicolumn{1}{c|}{31}         & 205        & \multicolumn{1}{c|}{13}         & 180             & 32              \\
+			\textbf{PN}                  & 12         & \multicolumn{1}{c|}{243}        & 26         & \multicolumn{1}{c|}{229}        & 38              & 217             \\ \hline
+			\multicolumn{1}{l}{\textbf{Accuracy}} & \multicolumn{2}{c}{90.9\%}                   & \multicolumn{2}{c}{91.8\%}                   & \multicolumn{2}{c}{83.9\%}       
 		\end{tabular}
-	\end{table}
+		\end{table}
 
 	\begin{table}[!ht]
 		\centering
 		\caption{{\bf Confusion matrix for transmembrane and non-transmembrane data }}
 		\label{tab:conf-all}
 		\begin{tabular}{ccccccc}
-			\multicolumn{3}{c}{Naive Bayes}                            & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
+			\multicolumn{3}{c}{Naive Bayes}                                  & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
 			& \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
-			\textbf{PP} & 214        & \multicolumn{1}{c|}{52}         & 242        & \multicolumn{1}{c|}{24}         & 214             & 52              \\
-			\textbf{PN} & 17         & \multicolumn{1}{c|}{248}        & 33         & \multicolumn{1}{c|}{232}        & 38              & 227             \\ \hline
+			\textbf{PP}       & 214        & \multicolumn{1}{c|}{52}         & 241        & \multicolumn{1}{c|}{25}         & 213             & 53              \\
+			\textbf{PN}       & 17         & \multicolumn{1}{c|}{248}        & 35         & \multicolumn{1}{c|}{230}        & 45              & 220             \\ \hline
+			\textbf{Accuracy} & \multicolumn{2}{c}{87.0\%}                   & \multicolumn{2}{c}{88.7\%}                   & \multicolumn{2}{c}{81.5\%}       
 		\end{tabular}
 	\end{table}
 	
 	\subsection*{Classifying Proteomes}
-	The classifiers were ran on two complete Proteomes downloaded from BioMarts Ensembl service \cite{ensembl}. The two proteomes are Choloepus hoffmanni (Sloth) and Gallus gallus (Chicken). A summary of the classifiers signal peptide detection rate is shown in Table \ref{tab:sloth} for Choloepus hoffmanni and Table \ref{tab:chicken} for Gallus gallus. The total number of protein sequences for each species can be seen in Table \ref{tab:prot-count}.
+	The classifiers were ran on two complete Proteomes downloaded from BioMarts Ensembl service \cite{ensembl}. The two proteomes are Choloepus hoffmanni (Sloth) and Gallus gallus (Chicken). A summary of the classifiers signal peptide detection rate is shown in Table \ref{tab:sloth} for Choloepus hoffmanni and Table \ref{tab:chicken} for Gallus gallus. The total number of protein sequences for each species can be seen in Table \ref{tab:prot-count}. Points of interest are in sorted order of positive predictions by classifier. For both proteomes, Naive Bayes predicted the most signal peptides, SVM with a linear kernel the least, and the Random Forest classifier taking the middle. 
 	
 	\begin{table}[!ht]
 		\centering
@@ -408,6 +419,8 @@
 	\end{table}
 	
 	\section*{Conclusion}
+	
+	Using a residue length of 35 and trigrams proved to have the greatest affect on the accuracy on the test set. Small increases in accuracy were obtained afterwards by tuning the classifier parameters. The biggest surprise was the SVM kernel selected by performing a grid search over a set of parameters. The kernel that performed the best was the 'linear' kernel, or no kernel. The second surprising point was how well Naive Bayes performed on the held out set of data. In all cases the SVM classifier outperformed the the Random Forest classifier while being closely tailed by the Naive Bayes classifier in terms of accuracy. In terms of further improvement, it could be argued that the Random Forest classifier was not tuned well enough to outperform what is considered to be a baseline classifier.  Though it is also possible that the No Free Lunch theorem is manifesting itself and making it clear that there is no one-size-fits all classifier, and this could hold true for so-called baseline classifiers as well. In future work, it would be useful to investigate other classifiers  such as Nearest Neighbors and a various neural network architectures. 
 	
 	
 
