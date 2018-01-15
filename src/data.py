@@ -31,7 +31,7 @@ def get_data():
             'non_tm': []
         }
     }
-    data_dir = '/home/jonas/peppred/data/training_data'
+    data_dir = '../data/training_data'
     for key in files:
         for subkey in files[key]:
             file_path = os.path.join(data_dir, key, subkey, '*.faa')
@@ -40,6 +40,17 @@ def get_data():
                 for subitem in item:
                     data[key][subkey].append(subitem)
     return data
+
+def read_input_file(file, vectorizer, n_gram_range=(3,3), seq_len=None):
+    data = []
+    for item in [SeqIO.parse(file, format='fasta', alphabet=extended_protein)]:
+        for subitem in item:
+            data.append(subitem)
+    sequences = []
+    for item in data:
+        sequences.append(str(item.seq)[:seq_len])
+    return vectorizer.transform(sequences)
+
 
 def annotate_regions(datum):
     sequence, annotation = datum.split('#')
@@ -61,7 +72,7 @@ def annotate_regions(datum):
         'annotations': str(annotation),
     }
 
-def transform_data(data):
+def transform_data(data, slice_length=None):
     """Perform preprocessing steps"""
 
     transformed_data = []
@@ -72,7 +83,7 @@ def transform_data(data):
             # Flatten data into a list of dictionaries with features as the key
             for item in data[key][subkey]:
                 data_item = {
-                    'sequence': item,
+                    'sequence': item[:slice_length],
                     'class': None,
                     'tm': None,
                 }
@@ -90,12 +101,12 @@ def transform_data(data):
                 == len(data['positive_examples']['non_tm'] + data['negative_examples']['non_tm'])
     return transformed_data
 
-def split_and_vectorize(transformed_data, n_gram_range=(2, 2)):
+def split_and_vectorize(transformed_data, n_gram_range=(3, 3)):
     """Vectorize and split data"""
     examples = [str(seq['sequence']) for seq in transformed_data]
     labels = [item['class'] for item in transformed_data]
     x_train, x_test, y_train, y_test = train_test_split(examples, labels,
-                                                        test_size=0.1, random_state=99)
+                                                        test_size=0.2, random_state=99)
     vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=n_gram_range)
     x_train = vectorizer.fit_transform(x_train)
     x_test = vectorizer.transform(x_test)
@@ -106,10 +117,14 @@ def split_and_vectorize(transformed_data, n_gram_range=(2, 2)):
         'x_test': x_test,
         'y_test': y_test,
         'feature_names': feature_names,
+        'vectorizer': vectorizer
     }
 
-def get_ml_data():
-    return split_and_vectorize(transform_data(get_data()))
+def get_ml_data(n_gram_range=(3,3), sequence_length=None):
+    return split_and_vectorize(
+        transform_data(
+            get_data(), sequence_length), n_gram_range)
+
 if __name__ == '__main__':
     raw_data = get_data()
     transformed_data = transform_data(raw_data)
