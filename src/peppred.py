@@ -3,17 +3,22 @@ from classification import get_classifiers, get_tuned_params, tune_classifier
 from data import get_ml_data, read_input_file
 from sklearn import metrics
 import warnings
+import os
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
+def is_valid_file(file, parser):
+    if not os.path.exists(file):
+        parser.error(f"Could not find the file: {file}")    
+    return os.path.abspath(file)
 
 if __name__ == '__main__':
     clf_choices = ['nb', 'random_forest', 'svm']
     parser = argparse.ArgumentParser(description='Signal Peptide Predictor')
-    parser.add_argument('classifier', choices=clf_choices + ['benchmark'], help='Which classifier to use')
-    parser.add_argument('--slice_length', help='Length of sequence to analyze', type=int, default=35)
-    parser.add_argument('--n', help='The N in N-Gram ', type=int, default=3)
-    parser.add_argument('--file', help='File of a sequence to predict')
+    parser.add_argument('classifier', choices=clf_choices + ['benchmark'], help='Which classifier do you want to run on a file? If no file select benchmark')
+    parser.add_argument('--slice_length', help='Number of amino acid residues to include in model', type=int, default=35)
+    parser.add_argument('--n', help='The N in N-Gram', type=int, default=3)
+    parser.add_argument('--file', help='File of a sequence to predict', type=lambda f: is_valid_file(f, parser))
     args = parser.parse_args()
     classifiers = get_classifiers()
 

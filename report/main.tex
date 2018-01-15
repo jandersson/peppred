@@ -233,7 +233,7 @@
 		\item{Jupyter Notebook: Prototyping}
 	\end{itemize}
 	\subsection*{Data Preprocessing}
-	The training data is FASTA-like with each sequence followed by an annotation line.  The annotation line marks the location of the n-, h-, and c- regions. The annotation line is removed during preprocessing. The training data is a corpus
+	The training data is FASTA-like with each sequence followed by an annotation line.  The annotation line marks the location of the n-, h-, and c- regions. The annotation line is removed during preprocessing. The class information and sequence string is stored in a hash ready for modeling.
 	
 	\subsection*{Data Modeling}
 	The training data is represented using a language model called N-grams. N-gram models are a probabilistic language model which predict the next word or symbol from the previous N-1 words or symbols. Since we are using amino acid residues in place of words, this will instead predict the next residue from the previous N-1 residues. 

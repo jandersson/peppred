@@ -31,6 +31,9 @@ def get_data():
             'non_tm': []
         }
     }
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+    os.chdir(dname)
     data_dir = '../data/training_data'
     for key in files:
         for subkey in files[key]:
