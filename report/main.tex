@@ -309,7 +309,7 @@
 	When given an observation that has a large euclidean distance from a training observation then the sum $\sum_{j=1}^{p}({x_{ij}-x_{x^\prime j}})^2$ will be large, but the equation \ref{rbf} will be small. This means that it will not affect the classification of points closer to the training data. Support vector machines are considered one of the best 'out of the box' classifiers \cite{yellowbook}. In this experiment we make use of the radial or RBF kernel. It is hypothesized that this will be the strongest classifier of the 3 chosen. 
 	
 	\subsubsection*{Random Forests}
-	Random Forests are a collection of decision tree's. Decision tree's suffer from high variance, because when the training data is split randomly and fit to a decision tree, the results could be different based on the split \cite{yellowbook}. However with random forests, each time a split is considered, a random sample of $m$ predictors is chosen instead of the full set of predictors $p$. A rule of thumb is that the sample $m \approx \sqrt{p}$ \cite{yellowbook}. Sampling only a subset of the total predictors mitigates the effect of very strong predictors. In a standard tree these strong predictors would be candidates for the top split because they maximize the information gain. 
+	Random Forests are a collection of decision tree's. Decision tree's suffer from high variance, because when the training data is split randomly and fit to a decision tree, the results could be different based on the split \cite{yellowbook}. However with random forests, each time a split is considered, a random sample of $m$ predictors is chosen instead of the full set of predictors $p$. A rule of thumb is that the sample $m \approx \sqrt{p}$ \cite{yellowbook}. Sampling only a subset of the total predictors mitigates the effect of very strong predictors. In a standard tree these strong predictors would be candidates for the top split because they maximize the information gain. Random forests decorrelate the tree's by only considering a subset of the predictors. If $m=p$ then this is known as bagging.
 	
 	\subsection*{Stafford Noble's Guidelines}
 	The guidelines given in 'A Quick Guide to Organizing Computational Biology Projects' \cite{noble} were adhered to for the most part with some small deviations. The deviations were largely due to time constraints. The spirit of the document was followed.
@@ -327,6 +327,7 @@
 	Improving a model lies in understanding where mistakes are made. In a classifier this is done with a confusion matrix (also called a contingency table). A confusion matrix for a 2-way classification task is a $2 \times 2$ matrix, where cell $x,y$ is the number of times an item with correct classification as $x$ was classified by the model as $y$. 
 	% Place tables after the first paragraph in which they are cited.
 
+	Looking at the confusion matrix for models trained and tested on transmembrane data in Table \ref{tab:conf-tm} we can see that there are not many examples to work with. The high error rate demonstrates the need for collecting more examples or features surrounding transmembrane signal peptides.
 	\begin{table}[!ht]
 		\centering
 		\caption{{\bf Confusion matrix for transmembrane data}}
@@ -339,6 +340,8 @@
 		\end{tabular}
 	\end{table}
 
+	In the confusion matrix for non-transmembrane data found in Table \ref{tab:conf-non-tm} we have more examples to work with. The classifier performs better when examining only non-transmembrane peptides compared to transmembrane only and the whole training set. The SVM classifier does particularly well in this setting. 
+	
 	\begin{table}[!ht]
 		\centering
 		\caption{{\bf Confusion matrix for non-transmembrane data}}
@@ -351,17 +354,17 @@
 		\end{tabular}
 	\end{table}
 
-\begin{table}[!ht]
-	\centering
-	\caption{{\bf Confusion matrix for transmembrane and non-transmembrane data }}
-	\label{tab:conf-all}
-	\begin{tabular}{ccccccc}
-		\multicolumn{3}{c}{Naive Bayes}                            & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
-		& \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
-		\textbf{PP} & 214        & \multicolumn{1}{c|}{52}         & 242        & \multicolumn{1}{c|}{24}         & 214             & 52              \\
-		\textbf{PN} & 17         & \multicolumn{1}{c|}{248}        & 33         & \multicolumn{1}{c|}{232}        & 38              & 227             \\ \hline
-	\end{tabular}
-\end{table}
+	\begin{table}[!ht]
+		\centering
+		\caption{{\bf Confusion matrix for transmembrane and non-transmembrane data }}
+		\label{tab:conf-all}
+		\begin{tabular}{ccccccc}
+			\multicolumn{3}{c}{Naive Bayes}                            & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
+			& \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
+			\textbf{PP} & 214        & \multicolumn{1}{c|}{52}         & 242        & \multicolumn{1}{c|}{24}         & 214             & 52              \\
+			\textbf{PN} & 17         & \multicolumn{1}{c|}{248}        & 33         & \multicolumn{1}{c|}{232}        & 38              & 227             \\ \hline
+		\end{tabular}
+	\end{table}
 	
 	\subsection*{Classifying Proteomes}
 	The classifiers were ran on two complete Proteomes downloaded from BioMarts Ensembl service \cite{ensembl}. The two proteomes are Choloepus hoffmanni (Sloth) and Gallus gallus (Chicken). A summary of the classifiers signal peptide detection rate is shown in Table \ref{tab:sloth} for Choloepus hoffmanni and Table \ref{tab:chicken} for Gallus gallus. The total number of protein sequences for each species can be seen in Table \ref{tab:prot-count}.

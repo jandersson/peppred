@@ -26,12 +26,12 @@ if __name__ == '__main__':
             print(f"{tm}")
             for clf_name in clf_choices:
                 clf = classifiers[clf_name]
-                clf['clf'] = tune_classifier(clf['clf'], get_tuned_params(clf_name), data)
-                clf['clf'].fit(data['x_train'], data['y_train'])
-                pred = clf['clf'].predict(data['x_test'])
+                clf = tune_classifier(clf['clf'], get_tuned_params(clf_name), data)
+                clf.fit(data['x_train'], data['y_train'])
+                pred = clf.predict(data['x_test'])
                 score = metrics.accuracy_score(data['y_test'], pred)
                 print('=' * 80)
-                print(f"{clf['name']}")
+                print(f"{classifiers[clf_name]['name']}")
                 print("accuracy: %0.3f" % score)
                 print("confusion matrix:")
                 print(metrics.confusion_matrix(data['y_test'], pred))

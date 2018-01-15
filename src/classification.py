@@ -3,7 +3,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import RidgeClassifier, Perceptron, PassiveAggressiveClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import BernoulliNB, MultinomialNB
-from sklearn.svm import LinearSVC
+from sklearn.svm import SVC
 # End Classifiers
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
@@ -18,7 +18,7 @@ def benchmark_classifiers(classifiers, x_train, y_train, x_test, y_test):
     return scores
 
 def tune_classifier(clf, params, data):
-    """Tunes a classifier. Does not tune a fish."""
+    """Tunes a classifier by performing grid search over the paramaters"""
     clf = GridSearchCV(clf, params)
     clf.fit(data['x_train'], data['y_train'])
     return clf
@@ -29,7 +29,7 @@ def get_classifiers():
         'knn': {'clf': KNeighborsClassifier(), 'name': 'kNN'},
         'perceptron': {'clf': Perceptron(n_iter=100), 'name': 'Perceptron'},
         'random_forest': {'clf': RandomForestClassifier(), 'name': 'Random Forest'},
-        'svm': {'clf': LinearSVC(), 'name': 'SVM'},
+        'svm': {'clf': SVC(), 'name': 'SVM'},
         'nb': {'clf': BernoulliNB(), 'name': 'Naive Bayes'},
     }
     return classifiers
@@ -40,7 +40,7 @@ def get_tuned_params(classifier_name):
         'knn': [{'n_neighbors': list(range(1, 21))}],
         'perceptron': [{'n_iter': [100]}],
         'random_forest': [{}],
-        'svm': [{}],
+        'svm': [{'C': [0.01, 0.1, 0.5, 1], 'kernel': ['rbf', 'linear', 'poly', 'sigmoid']}],
         'nb': [{}],
         }
     return tuned_params.get(classifier_name)
