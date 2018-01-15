@@ -17,38 +17,34 @@ if __name__ == '__main__':
     args = parser.parse_args()
     classifiers = get_classifiers()
 
-    data = get_ml_data((args.n,args.n), args.slice_length)
 
     if args.classifier == 'benchmark':
         print("Benchmarking classifiers")
-        for clf_name in clf_choices:
-            clf = classifiers[clf_name]
-            clf['clf'] = tune_classifier(clf['clf'], get_tuned_params(clf_name), data)
-            clf['clf'].fit(data['x_train'], data['y_train'])
-            # print(clf.params)
-            pred = clf['clf'].predict(data['x_test'])
-            score = metrics.accuracy_score(data['y_test'], pred)
-            print('=' * 80)
-            print(f"{clf['name']}")
-            print("accuracy: %0.3f" % score)
-            print("confusion matrix:")
-            print(metrics.confusion_matrix(data['y_test'], pred))
+        for tm in ['tm', 'non_tm', None]:
+            data = get_ml_data((args.n, args.n), args.slice_length, tm=tm)
+            print('*' * 80)
+            print(f"{tm}")
+            for clf_name in clf_choices:
+                clf = classifiers[clf_name]
+                clf['clf'] = tune_classifier(clf['clf'], get_tuned_params(clf_name), data)
+                clf['clf'].fit(data['x_train'], data['y_train'])
+                pred = clf['clf'].predict(data['x_test'])
+                score = metrics.accuracy_score(data['y_test'], pred)
+                print('=' * 80)
+                print(f"{clf['name']}")
+                print("accuracy: %0.3f" % score)
+                print("confusion matrix:")
+                print(metrics.confusion_matrix(data['y_test'], pred))
             # print("classification report:")
             # print(metrics.classification_report(data['y_test'], pred, data['feature_names']))
-    else:
+    elif args.file:
+        data = get_ml_data((args.n,args.n), args.slice_length)
         file_data = read_input_file(args.file, data['vectorizer'], (args.n, args.n), args.slice_length)
-        # print(file_data)
         clf = classifiers[args.classifier]
         clf['clf'] = tune_classifier(clf['clf'], get_tuned_params(args.classifier), data)
         clf['clf'].fit(data['x_train'], data['y_train'])
-        
-        # print(clf.params)
         pred = clf['clf'].predict(file_data)
         hits = sum(pred)
         print(f"Found {hits} signal peptides in {len(pred)} sequences ({hits/len(pred):.1%})")
-        # score = metrics.accuracy_score(data['y_test'], pred)
-        # print("accuracy: %0.3f" % score)
-        # print("confusion matrix:")
-        # print(metrics.confusion_matrix(data['y_test'], pred))
-        # print("classification report:")
-        # print(metrics.classification_report(data['y_test'], pred, data['feature_names']))
+    
+

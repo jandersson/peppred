@@ -167,7 +167,7 @@
 	% Title must be 250 characters or less.
 	\begin{flushleft}
 		{\Large
-			\textbf\newline{Predicting signal peptides using language modeling} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
+			\textbf\newline{Predicting signal peptides using machine learning} % Please use "sentence case" for title and headings (capitalize only the first word in a title (or heading), the first word in a subtitle (or subheading), and any proper nouns).
 		}
 		\newline
 		% Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
@@ -206,7 +206,7 @@
 	\end{flushleft}
 	% Please keep the abstract below 300 words
 	\section*{Abstract}
-	Abstract about using machine learning to predict signal peptides
+	We test three different classifiers against a test set of data to shed light on what techniques makes a good classifier. The classifiers are then used on two proteomes to infer signal peptide sequences. The classification pipeline combines N-gram language modeling with a vector space model using TF-IDF term weighting to provide data abstraction along with knowledge of the signal peptide structure to boost prediction accuracy on the test set of data. 
 	
 	
 	% Please keep the Author Summary between 150 and 200 words
@@ -225,7 +225,7 @@
 	
 	\section*{Materials and methods}
 	\subsection*{Data Preprocessing}
-	The training data comes from the project course page. The training data is FASTA-like with each sequence followed by an annotation line.  The annotation line marks the location of the n-, h-, and c- regions. The annotation line is removed during preprocessing. The training data is a corpus
+	The training data is FASTA-like with each sequence followed by an annotation line.  The annotation line marks the location of the n-, h-, and c- regions. The annotation line is removed during preprocessing. The training data is a corpus
 	
 	\subsection*{Data Modeling}
 	The training data is represented using a language model called N-grams. N-gram models are a probabilistic language model which predict the next word or symbol from the previous N-1 words or symbols. Since we are using amino acid residues in place of words, this will instead predict the next residue from the previous N-1 residues. 
@@ -234,7 +234,7 @@
 	
 	% For figure citations, please use "Fig" instead of "Figure".
 	% Place figure captions after the first paragraph in which they are cited.
-	\begin{figure}[h]
+	\begin{figure}[!h]
 		\centering
 		\includegraphics[scale=0.5, width=\textwidth]{sequence-hist}
 		\caption{{\bf Training Data Length Histogram}}
@@ -269,42 +269,42 @@
 
 	\begin{table}[!ht]
 		\centering
-		\caption{{\bf SVM Confusion Matrix on Test Data}}
-		\label{tab:conf-svm}
-		\begin{tabular}{lcc}
-		\hline
-		& \multicolumn{1}{l}{\textbf{Condition Positive}} & \multicolumn{1}{l}{\textbf{Condition Negative}} \\ \hline
-		\textbf{Predicted Positive} & 242                                             & 24                                              \\
-		\textbf{Predicted Negative} & 33                                              & 232                                             \\ \hline
+		\caption{{\bf Confusion matrix for transmembrane data}}
+		\label{tab:conf-tm}
+		\begin{tabular}{lccllcc}
+			\multicolumn{3}{l}{Naive Bayes}                                                & \multicolumn{2}{c}{SVM}                                          & \multicolumn{2}{l}{Random Forest} \\ \hline
+			& \multicolumn{1}{l}{\textbf{P}} & \multicolumn{1}{l|}{\textbf{N}} & \multicolumn{1}{c}{\textbf{P}} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
+			\textbf{PP} & 47                             & \multicolumn{1}{c|}{0}          & 47                             & \multicolumn{1}{l|}{0}          & 47              & 0               \\
+			\textbf{PN} & 12                             & \multicolumn{1}{c|}{0}          & 8                              & \multicolumn{1}{l|}{4}          & 12              & 0               \\ \hline
 		\end{tabular}
 	\end{table}
 
 	\begin{table}[!ht]
 		\centering
-		\caption{{\bf Naive Bayes Confusion Matrix on Test Data}}
-		\label{tab:conf-nb}
-		\begin{tabular}{@{}lcc@{}}
-			\toprule
-			& \multicolumn{1}{l}{\textbf{Condition Positive}} & \multicolumn{1}{l}{\textbf{Condition Negative}} \\ \midrule
-			\textbf{Predicted Positive} & 214                                             & 52                                              \\
-			\textbf{Predicted Negative} & 17                                              & 248                                             \\ \bottomrule
+		\caption{{\bf Confusion matrix for non-transmembrane data}}
+		\label{tab:conf-non-tm}
+		\begin{tabular}{ccccccc}
+			\multicolumn{3}{c}{Naive Bayes}                            & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
+			& \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
+			\textbf{PP} & 187        & \multicolumn{1}{c|}{31}         & 204        & \multicolumn{1}{c|}{14}         & 186             & 32              \\
+			\textbf{PN} & 12         & \multicolumn{1}{c|}{243}        & 23         & \multicolumn{1}{c|}{232}        & 42              & 213             \\ \hline
 		\end{tabular}
 	\end{table}
-			
-	\begin{table}[!ht]
-		\centering
-		\caption{{\bf Random Forest Confusion Matrix on Test Data}}
-		\label{tab:conf-forest}
-		\begin{tabular}{lcc}
-			\hline
-			& \multicolumn{1}{l}{\textbf{Condition Positive}} & \multicolumn{1}{l}{\textbf{Condition Negative}} \\ \hline
-			\textbf{Predicted Positive} & 214                                             & 52                                              \\
-			\textbf{Predicted Negative} & 38                                              & 227                                             \\ \hline
-		\end{tabular}
-	\end{table}
+
+\begin{table}[]
+	\centering
+	\caption{{\bf Confusion matrix for transmembrane and non-transmembrane data }}
+	\label{tab:conf-all}
+	\begin{tabular}{ccccccc}
+		\multicolumn{3}{c}{Naive Bayes}                            & \multicolumn{2}{c}{SVM}                      & \multicolumn{2}{c}{Random Forest} \\ \hline
+		& \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P} & \multicolumn{1}{c|}{\textbf{N}} & \textbf{P}      & \textbf{N}      \\ \hline
+		\textbf{PP} & 214        & \multicolumn{1}{c|}{52}         & 242        & \multicolumn{1}{c|}{24}         & 214             & 52              \\
+		\textbf{PN} & 17         & \multicolumn{1}{c|}{248}        & 33         & \multicolumn{1}{c|}{232}        & 38              & 227             \\ \hline
+	\end{tabular}
+\end{table}
 	
 	\subsection*{Classifying Proteomes}
-	The classifiers were ran on two complete Proteomes downloaded from BioMarts Ensembl service. The two proteomes are Choloepus hoffmanni (Sloth) and Gallus gallus (Chicken). A summary of the classifiers signal peptide detection rate is shown in table \ref{tab:sloth} for Choloepus hoffmanni and table \ref{tab:chicken} for Gallus gallus. The total number of protein sequences for each species can be seen in table \ref{tab:prot-count}.
+	The classifiers were ran on two complete Proteomes downloaded from BioMarts Ensembl service \cite{ensembl}. The two proteomes are Choloepus hoffmanni (Sloth) and Gallus gallus (Chicken). A summary of the classifiers signal peptide detection rate is shown in Table \ref{tab:sloth} for Choloepus hoffmanni and Table \ref{tab:chicken} for Gallus gallus. The total number of protein sequences for each species can be seen in Table \ref{tab:prot-count}.
 	
 	\begin{table}[!ht]
 		\centering
@@ -329,6 +329,18 @@
 			\textbf{Naive Bayes}   & 10250                                    & 33.9\%                         \\
 			\textbf{SVM}           & 5982                                     & 19.8\%                         \\
 			\textbf{Random Forest} & 8018                                     & 26.5\%                        
+		\end{tabular}
+	\end{table}
+	
+	\begin{table}[!ht]
+		\centering
+		\caption{{\bf Total sequence counts }}
+		\label{tab:prot-count}
+		\begin{tabular}{@{}lc@{}}
+			\toprule
+			& \multicolumn{1}{l}{Sequence Count} \\ \midrule
+			\textbf{Gallus gallus}       & 30252                              \\
+			\textbf{Choloepus hoffmanni} & 12435                             
 		\end{tabular}
 	\end{table}
 	
@@ -362,6 +374,11 @@
 		Jurafsky D. Martin HM.
 		\newblock {{S}peech and language processing: An introduction to natural language processing, computational linguistics, and speech recognition.}
 		\newblock {London: Pearson Education; 2009}
+		
+		\bibitem{ensembl}
+		Zerbino D, Achuthan P, Akanni W, Amode M, Barrell D, Bhai J et al. 
+		\newblock Ensembl 2018. 
+		\newblock Nucleic Acids Research. 2017;46(D1):D754-D761. 
 		
 	\end{thebibliography}
 	

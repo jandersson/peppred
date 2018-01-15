@@ -39,9 +39,9 @@ def get_tuned_params(classifier_name):
     tuned_params = {
         'knn': [{'n_neighbors': list(range(1, 21))}],
         'perceptron': [{'n_iter': [100]}],
-        'random_forest': [{'n_estimators': [10, 20, 100, 150]}],
-        'svm': [{'penalty': ['l2'], 'tol': [1e-3, 1e-2, 1e-1]}],
-        'nb': [{'alpha': [0.01, 0.05, 0.25]}]
+        'random_forest': [{}],
+        'svm': [{}],
+        'nb': [{}],
         }
     return tuned_params.get(classifier_name)
 

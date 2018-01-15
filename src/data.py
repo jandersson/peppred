@@ -72,7 +72,7 @@ def annotate_regions(datum):
         'annotations': str(annotation),
     }
 
-def transform_data(data, slice_length=None):
+def transform_data(data, slice_length=None, tm=None):
     """Perform preprocessing steps"""
 
     transformed_data = []
@@ -89,16 +89,23 @@ def transform_data(data, slice_length=None):
                 }
                 data_item['class'] = 0 if key == 'negative_examples' else 1
                 data_item['tm'] = False if subkey == 'non_tm' else True
+                if tm == 'tm':
+                    if subkey == 'non_tm': 
+                        continue
+                if tm == 'non_tm':
+                    if subkey == 'tm':
+                        continue
                 transformed_data.append(data_item)
     # Quick sanity check, check if lengths of the data and transformed data are the same
-    assert len([item for item in transformed_data if item['class'] == 1]) \
-                == len(data['positive_examples']['tm'] + data['positive_examples']['non_tm'])
-    assert len([item for item in transformed_data if item['class'] == 0]) \
-                == len(data['negative_examples']['tm'] + data['negative_examples']['non_tm'])
-    assert len([item for item in transformed_data if item['tm']]) \
-                == len(data['positive_examples']['tm'] + data['negative_examples']['tm'])
-    assert len([item for item in transformed_data if not item['tm']]) \
-                == len(data['positive_examples']['non_tm'] + data['negative_examples']['non_tm'])
+    if not tm:
+        assert len([item for item in transformed_data if item['class'] == 1]) \
+                    == len(data['positive_examples']['tm'] + data['positive_examples']['non_tm'])
+        assert len([item for item in transformed_data if item['class'] == 0]) \
+                    == len(data['negative_examples']['tm'] + data['negative_examples']['non_tm'])
+        assert len([item for item in transformed_data if item['tm']]) \
+                    == len(data['positive_examples']['tm'] + data['negative_examples']['tm'])
+        assert len([item for item in transformed_data if not item['tm']]) \
+                    == len(data['positive_examples']['non_tm'] + data['negative_examples']['non_tm'])
     return transformed_data
 
 def split_and_vectorize(transformed_data, n_gram_range=(3, 3)):
@@ -120,10 +127,10 @@ def split_and_vectorize(transformed_data, n_gram_range=(3, 3)):
         'vectorizer': vectorizer
     }
 
-def get_ml_data(n_gram_range=(3,3), sequence_length=None):
+def get_ml_data(n_gram_range=(3,3), sequence_length=None, tm=None):
     return split_and_vectorize(
         transform_data(
-            get_data(), sequence_length), n_gram_range)
+            get_data(), sequence_length, tm), n_gram_range)
 
 if __name__ == '__main__':
     raw_data = get_data()
